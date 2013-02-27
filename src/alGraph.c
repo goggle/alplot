@@ -22,6 +22,7 @@ static int algraph_list_remove();
 //    algraph *g = (algraph *) malloc(sizeof(algraph));
 //    if (g == NULL)
 //        alerror("algraph_create: Could not allocate memory!");
+
 //    g->data = (alpoint *) malloc(ndata * sizeof(alpoint *));
 //    if (g->data == NULL)
 //        alerror("algraph_create: Could not allocate memory!");
@@ -206,8 +207,8 @@ void algraph_unset_show_points(algraph *g)
 
 void algraph_set_pointstyle(algraph *g, int style)
 {
-    if (style != 0 && style != 1)
-        aluierror("algraph_set_pointstyle: Point style must be 0 or 1.");
+    if (style < 0 || style > 5)
+        aluierror("algraph_set_pointstyle: Point style not valid");
     g->pointstyle = style;
 }
 

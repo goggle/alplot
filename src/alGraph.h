@@ -26,6 +26,7 @@ typedef struct
      * 1: x
      * 2: +
      * 3: *
+     * 4: square
      */
     int pointstyle;
     double pointsize;

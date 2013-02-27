@@ -20,6 +20,8 @@ static void draw_point_o(cairo_t *cr, alpoint pw);
 static void draw_point_x(cairo_t *cr, alpoint pw);
 static void draw_point_plus(cairo_t *cr, alpoint pw);
 static void draw_point_star(cairo_t *cr, alpoint pw);
+static void draw_point_square(cairo_t *cr, alpoint pw);
+static void draw_point_square45(cairo_t *cr, alpoint pw);
 static void draw_graph(cairo_surface_t *cs, alfigure *fig);
 
 
@@ -244,6 +246,10 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
                         draw_point_plus(c, pw);
                     else if (current_graph->pointstyle == 3)
                         draw_point_star(c, pw);
+                    else if (current_graph->pointstyle == 4)
+                        draw_point_square(c, pw);
+                    else if (current_graph->pointstyle == 5)
+                        draw_point_square45(c, pw);
                 }
                 //cairo_set_line_width(c,  0.5);
                 cairo_set_source_rgb(c, current_graph->pointcolor.r, current_graph->pointcolor.g, current_graph->pointcolor.b);
@@ -292,6 +298,30 @@ static void draw_point_star(cairo_t *cr, alpoint pw)
     cairo_move_to(cr, pw.x, pw.y - current_graph->pointsize * 0.5);
     cairo_line_to(cr, pw.x, pw.y + current_graph->pointsize * 0.5);
     cairo_set_line_width(cr, 0.8);
+}
+
+static void draw_point_square(cairo_t *cr, alpoint pw)
+{
+    const double offset = sqrt(0.125 * current_graph->pointsize * current_graph->pointsize);
+    cairo_move_to(cr, pw.x - offset, pw.y - offset);
+    cairo_line_to(cr, pw.x + offset, pw.y - offset);
+    cairo_line_to(cr, pw.x + offset, pw.y + offset);
+    cairo_line_to(cr, pw.x - offset, pw.y + offset);
+    //cairo_line_to(cr, pw.x - offset, pw.y + offset);
+    cairo_close_path(cr);
+    cairo_set_line_width(cr, 0.8);
+}
+
+static void draw_point_square45(cairo_t *cr, alpoint pw)
+{
+    const double offset = current_graph->pointsize * 0.5;
+    cairo_move_to(cr, pw.x, pw.y - offset);
+    cairo_line_to(cr, pw.x + offset, pw.y);
+    cairo_line_to(cr, pw.x, pw.y + offset);
+    cairo_line_to(cr, pw.x - offset, pw.y);
+    cairo_close_path(cr);
+    cairo_set_line_width(cr, 0.8);
+
 }
 
 
