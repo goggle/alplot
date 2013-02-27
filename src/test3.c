@@ -67,8 +67,6 @@ int main(void)
     
 
 
-
-
     ////fig->graph = graph;
     //alfigure_create_subxticks(fig, 20);
     //alfigure_create_subyticks(fig, 9);

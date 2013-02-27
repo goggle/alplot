@@ -10,11 +10,11 @@
  * TODO: The not drawing parts of these functions should be
  *       implemented in Figure.c
  */
-static void draw_xticks(cairo_surface_t *cs, alfigure *fig, int mode);
-static void draw_yticks(cairo_surface_t *cs, alfigure *fig, int mode);
-static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, int mode);
-static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, int mode);
-static void draw_ticks(cairo_surface_t *cs, alfigure *fig, int mode);
+static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool n, bool e, bool s, bool w);
 static void draw_points(cairo_surface_t *cs, alfigure *fig);
 static void draw_point_o(cairo_t *cr, alpoint pw);
 static void draw_point_x(cairo_t *cr, alpoint pw);
@@ -45,7 +45,7 @@ void alcairo_draw_figure(cairo_surface_t *cs, alfigure *fig)
     cairo_stroke(c);
     cairo_destroy(c);
 
-    draw_ticks(cs, fig, 2);
+    draw_ticks(cs, fig, fig->show_ticks[0], fig->show_ticks[1], fig->show_ticks[2], fig->show_ticks[3]);
 
     draw_graph(cs, fig);
     draw_points(cs, fig);
@@ -58,31 +58,34 @@ void alcairo_write_pdf(cairo_surface_t *cs)
     cairo_surface_destroy(cs);
 }
 
-static void draw_ticks(cairo_surface_t *cs, alfigure *fig, int mode)
+static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool north, bool east, bool south, bool west)
 {
-    assert (mode == 1 || mode == 2);
-    draw_xticks(cs, fig, 1);
-    draw_yticks(cs, fig, 1);
-    draw_subxticks(cs, fig, 1);
-    draw_subyticks(cs, fig, 1);
-    if (mode == 2) {
-        draw_xticks(cs, fig, 2);
-        draw_yticks(cs, fig, 2);
-        draw_subxticks(cs, fig, 2);
-        draw_subyticks(cs, fig, 2);
+    if (north) {
+        draw_xticks(cs, fig, false);
+        draw_subxticks(cs, fig, false);
+    }
+    if (east) {
+        draw_yticks(cs, fig, false);
+        draw_subyticks(cs, fig, false);
+    }
+    if (south) {
+        draw_xticks(cs, fig, true);
+        draw_subxticks(cs, fig, true);
+    }
+    if (west) {
+        draw_yticks(cs, fig, true);
+        draw_subyticks(cs, fig, true);
     }
 }
 
 
 /*
  * Draw the xticks.
- * mode:    1: only draw the xticks at the bottom
- *          2: draw the xticks at the top the figure
+ * loc:     false: north
+ *          true:  south
  */
-static void draw_xticks(cairo_surface_t *cs, alfigure *fig, int mode)
+static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
-    assert(mode == 1 || mode == 2);
-
     cairo_t *c;
     unsigned int i;
     alpoint p_begin;
@@ -92,9 +95,9 @@ static void draw_xticks(cairo_surface_t *cs, alfigure *fig, int mode)
     c = cairo_create(cs);
     for (i = 0; i < fig->nxticks; i++) {
         p_fig.x = fig->xticks[i];
-        if (mode == 1)
+        if (loc)
             p_fig.y = fig->ylim[0];
-        else if (mode == 2)
+        else
             p_fig.y = fig->ylim[1];
         p_begin = p_end = fig_to_world(p_fig, fig);
         p_begin.y  += 5;
@@ -112,10 +115,8 @@ static void draw_xticks(cairo_surface_t *cs, alfigure *fig, int mode)
     cairo_destroy(c);
 }
 
-static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, int mode)
+static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
-    assert(mode == 1 || mode == 2);
-
     if (fig->nsubxticks == 0) {
 #ifdef CAIRO_DEBUG
         printf("draw_subxticks: No subxticks specified.\n");
@@ -131,9 +132,9 @@ static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, int mode)
     c = cairo_create(cs);
     for (i = 0; i < fig->nsubxticks; i++) {
         p_fig.x = fig->subxticks[i];
-        if (mode == 1)
+        if (loc)
             p_fig.y = fig->ylim[0];
-        else if (mode == 2)
+        else
             p_fig.y = fig->ylim[1];
         p_begin = p_end = fig_to_world(p_fig, fig);
         p_begin.y += 3;
@@ -147,10 +148,13 @@ static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, int mode)
 }
 
 
-static void draw_yticks(cairo_surface_t *cs, alfigure *fig, int mode)
+/*
+ * Draw the xticks.
+ * loc:     false: east
+ *          true:  west
+ */
+static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
-    assert (mode == 1 || mode == 2);
-
     cairo_t *c;
     unsigned int i;
     alpoint p_begin;
@@ -159,9 +163,9 @@ static void draw_yticks(cairo_surface_t *cs, alfigure *fig, int mode)
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nyticks; i++) {
-        if (mode == 1)
+        if (loc)
             p_fig.x = fig->xlim[0];
-        else if (mode == 2)
+        else
             p_fig.x = fig->xlim[1];
         p_fig.y = fig->yticks[i];
         p_begin = p_end = fig_to_world(p_fig, fig);
@@ -180,10 +184,8 @@ static void draw_yticks(cairo_surface_t *cs, alfigure *fig, int mode)
     cairo_destroy(c);
 }
 
-static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, int mode)
+static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
-    assert (mode == 1 || mode == 2);
-
     if (fig->nsubyticks == 0) {
 #ifdef CAIRO_DEBUG
         printf("draw_subyticks: No subyticks specified.\n");
@@ -198,9 +200,9 @@ static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, int mode)
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nsubyticks; i++) {
-        if (mode == 1)
+        if (loc)
             p_fig.x = fig->xlim[0];
-        else if (mode == 2)
+        else
             p_fig.x = fig->xlim[1];
         p_fig.y = fig->subyticks[i];
         p_begin = p_end = fig_to_world(p_fig, fig);

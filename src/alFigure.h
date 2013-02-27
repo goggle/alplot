@@ -22,6 +22,15 @@ typedef struct
     double xlim[2];
     double ylim[2];
     bool legend;
+
+    /*
+     * Where the ticks should appear:
+     * 0: north
+     * 1: east
+     * 2: south
+     * 3: west
+     */
+    bool show_ticks[4];
     double *xticks;
     unsigned int nxticks; /* number of xticks */
     double *yticks;
@@ -50,6 +59,7 @@ void alfigure_add_graph(alfigure *fig, algraph *graph);
 double alfigure_get_height(alfigure *fig);
 double alfigure_get_width(alfigure *fig);
 
+void alfigure_set_show_ticks(alfigure *fig, bool n, bool e, bool s, bool w);
 void alfigure_create_subxticks(alfigure *fig, unsigned int n);
 void alfigure_create_subyticks(alfigure *fig, unsigned int n);
 

@@ -20,6 +20,11 @@ alfigure* alfigure_create()
     fig->ylim[0] = -0.5;
     fig->ylim[1] = 0.5;
 
+    fig->show_ticks[0] = true;
+    fig->show_ticks[1] = true;
+    fig->show_ticks[2] = true;
+    fig->show_ticks[3] = true;
+
     /* TODO: Free memory! */
     fig->xticks = (double *) malloc(3 * sizeof(int));
     fig->yticks = (double *) malloc(3 * sizeof(int));
@@ -190,6 +195,13 @@ void alfigure_print_subyticks(alfigure *fig)
     printf("\n");
 }
 
+void alfigure_set_show_ticks(alfigure *fig, bool north, bool east, bool south, bool west)
+{
+    fig->show_ticks[0] = north;
+    fig->show_ticks[1] = east;
+    fig->show_ticks[2] = south;
+    fig->show_ticks[3] = west;
+}
 
 void set_xlim(alfigure *fig, double xmin, double xmax)
 {
