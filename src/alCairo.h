@@ -9,16 +9,9 @@
 
 
 
-
-
-cairo_surface_t* open_pdf(const char *fname);
-
-void draw_figure(cairo_surface_t *cs, alfigure *fig);
-//void draw_line(alline *line);
-
-void write_pdf(cairo_surface_t *cs);
-
-
+cairo_surface_t* alcairo_open_pdf(const char *fname);
+void alcairo_draw_figure(cairo_surface_t *cs, alfigure *fig);
+void alcairo_write_pdf(cairo_surface_t *cs);
 
 
 

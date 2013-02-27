@@ -2,7 +2,7 @@
 #define ALCORE_H
 
 #define DEBUG
-#define CAIRO_DEBUG
+//#define CAIRO_DEBUG
 #define PI (3.14159265358979)
 
 typedef struct 

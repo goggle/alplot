@@ -12,12 +12,21 @@ typedef struct
     alpoint *data;
     unsigned int ndata;
     bool visible;
+    bool show_graphline;
     double linewidth;
     rgba_color linecolor;
     int linestyle; /* 0: solid, 1: dashed */
     char *name;
     bool legend;
     bool show_points;
+
+    /* 
+     * point styles:
+     * 0: o
+     * 1: x
+     * 2: +
+     * 3: *
+     */
     int pointstyle;
     double pointsize;
     rgba_color pointcolor;
@@ -49,8 +58,8 @@ extern algraph_list graph_list;
 void algraph_create();
 
 void algraph_set_data(algraph *g, double datax[], double datay[], unsigned int n);
-void algraph_set_visible(algraph *g);
-void algraph_unset_visible(algraph *g);
+void algraph_set_show_graphline(algraph *g);
+void algraph_unset_show_graphline(algraph *g);
 void algraph_set_linewidth(algraph *g, double lw);
 void algraph_set_linecolor(algraph *graph, double r, double g, double b, double alpha);
 void algraph_set_name(algraph *g, const char *name);
@@ -60,6 +69,7 @@ void algraph_set_show_points(algraph *g);
 void algraph_unset_show_points(algraph *g);
 void algraph_set_pointstyle(algraph *g, int style);
 void algraph_set_pointsize(algraph *g, double size);
+void algraph_set_pointcolor(algraph *graph, double r, double g, double b, double alpha);
 void algraph_set_interpolation_method(algraph *g, int m);
 unsigned int algraph_get_id(algraph *g);
 void algraph_print(algraph *g);

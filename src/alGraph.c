@@ -67,7 +67,7 @@ void algraph_create()
     id++;
     g->data = NULL;
     g->ndata = 0;
-    g->visible = true;
+    g->show_graphline = true;
     g->linewidth = 1.0;
     g->linecolor.r = g->linecolor.g = g->linecolor.b = 0.0;
     g->linecolor.alpha = 1.0;
@@ -75,7 +75,7 @@ void algraph_create()
     g->legend = false;
     g->show_points = false;
     g->pointstyle = 0;
-    g->pointsize = 7.0;
+    g->pointsize = 5.0;
     g->pointcolor.r = g->pointcolor.g = g->pointcolor.b = 0.0;
     g->pointcolor.alpha = 1.0;
     g->bezier_control_points = NULL;
@@ -127,7 +127,7 @@ void algraph_print(algraph *g)
         }
         printf("(%.3f, %.3f)\n", g->data[g->ndata - 1].x, g->data[g->ndata - 1].y);
     }
-    printf("Visible: %d\n", g->visible);
+    printf("Show graph line: %d\n", g->show_graphline);
     printf("Line width: %.2f\n", g->linewidth);
     printf("Line color: (%.2f, %.2f, %.2f)\n", g->linecolor.r, g->linecolor.g, g->linecolor.b);
     printf("Line alpha value: %.2f\n", g->linecolor.alpha);
@@ -149,15 +149,15 @@ void algraph_print(algraph *g)
     printf("\n");
 }
 
-void algraph_set_visible(algraph *g)
+void algraph_set_show_graphline(algraph *g)
 {
-    g->visible = true;
+    g->show_graphline = true;
 }
 
 
-void algraph_unset_visible(algraph *g)
+void algraph_unset_show_graphline(algraph *g)
 {
-    g->visible = false;
+    g->show_graphline = false;
 }
 
 void algraph_set_linewidth(algraph *g, double lw)
@@ -215,6 +215,16 @@ void algraph_set_pointsize(algraph *g, double size)
 {
     g->pointsize = size;
 }
+
+
+void algraph_set_pointcolor(algraph *graph, double r, double g, double b, double alpha)
+{
+    graph->pointcolor.r = r;
+    graph->pointcolor.g = g;
+    graph->pointcolor.b = b;
+    graph->pointcolor.alpha = alpha;
+}
+
 
 void algraph_set_interpolation_method(algraph *g, int m)
 {
