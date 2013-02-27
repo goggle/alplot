@@ -9,7 +9,7 @@ typedef struct
 {
     double x;
     double y;
-} alpoint;
+} alpoint2d;
 
 void alerror(const char *msg);
 void aluierror(const char *msg);

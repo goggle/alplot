@@ -51,7 +51,7 @@ typedef struct
 
 
 
-alpoint fig_to_world(alpoint fig_p, alfigure *fig);
+alpoint2d fig_to_world(alpoint2d fig_p, alfigure *fig);
 
 alfigure* alfigure_create();
 void alfigure_print(alfigure *fig);

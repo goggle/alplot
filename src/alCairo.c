@@ -16,12 +16,12 @@ static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc);
 static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc);
 static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool n, bool e, bool s, bool w);
 static void draw_points(cairo_surface_t *cs, alfigure *fig);
-static void draw_point_o(cairo_t *cr, alpoint pw);
-static void draw_point_x(cairo_t *cr, alpoint pw);
-static void draw_point_plus(cairo_t *cr, alpoint pw);
-static void draw_point_star(cairo_t *cr, alpoint pw);
-static void draw_point_square(cairo_t *cr, alpoint pw);
-static void draw_point_square45(cairo_t *cr, alpoint pw);
+static void draw_point_o(cairo_t *cr, alpoint2d pw);
+static void draw_point_x(cairo_t *cr, alpoint2d pw);
+static void draw_point_plus(cairo_t *cr, alpoint2d pw);
+static void draw_point_star(cairo_t *cr, alpoint2d pw);
+static void draw_point_square(cairo_t *cr, alpoint2d pw);
+static void draw_point_square45(cairo_t *cr, alpoint2d pw);
 static void draw_graph(cairo_surface_t *cs, alfigure *fig);
 
 
@@ -90,9 +90,9 @@ static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
     cairo_t *c;
     unsigned int i;
-    alpoint p_begin;
-    alpoint p_end;
-    alpoint p_fig;
+    alpoint2d p_begin;
+    alpoint2d p_end;
+    alpoint2d p_fig;
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nxticks; i++) {
@@ -127,9 +127,9 @@ static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc)
     }
     cairo_t *c;
     unsigned int i;
-    alpoint p_begin;
-    alpoint p_end;
-    alpoint p_fig;
+    alpoint2d p_begin;
+    alpoint2d p_end;
+    alpoint2d p_fig;
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nsubxticks; i++) {
@@ -159,9 +159,9 @@ static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc)
 {
     cairo_t *c;
     unsigned int i;
-    alpoint p_begin;
-    alpoint p_end;
-    alpoint p_fig;
+    alpoint2d p_begin;
+    alpoint2d p_end;
+    alpoint2d p_fig;
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nyticks; i++) {
@@ -196,9 +196,9 @@ static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc)
     }
     cairo_t *c;
     unsigned int i;
-    alpoint p_begin; 
-    alpoint p_end;
-    alpoint p_fig;
+    alpoint2d p_begin; 
+    alpoint2d p_end;
+    alpoint2d p_fig;
 
     c = cairo_create(cs);
     for (i = 0; i < fig->nsubyticks; i++) {
@@ -223,7 +223,7 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
 {
     cairo_t *c;
     unsigned int i, j;
-    alpoint pw;
+    alpoint2d pw;
 
     if (fig->graph == NULL) {
 #ifdef CAIRO_DEBUG
@@ -234,25 +234,26 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
 
     for (j = 0; j < fig->ngraph; j++) {
         if (algraph_get(fig->graph_id[j])) {
-            if (current_graph->show_points) {
+            if (current_graph->points.show) {
                 c = cairo_create(cs);
                 for (i = 0; i < current_graph->ndata; i++) {
                     pw = fig_to_world(current_graph->data[i], fig);
-                    if (current_graph->pointstyle == 0)
+                    if (current_graph->points.style == 0)
                         draw_point_o(c, pw);
-                    else if (current_graph->pointstyle == 1)
+                    else if (current_graph->points.style == 1)
                         draw_point_x(c, pw);
-                    else if (current_graph->pointstyle == 2)
+                    else if (current_graph->points.style == 2)
                         draw_point_plus(c, pw);
-                    else if (current_graph->pointstyle == 3)
+                    else if (current_graph->points.style == 3)
                         draw_point_star(c, pw);
-                    else if (current_graph->pointstyle == 4)
+                    else if (current_graph->points.style == 4)
                         draw_point_square(c, pw);
-                    else if (current_graph->pointstyle == 5)
+                    else if (current_graph->points.style == 5)
                         draw_point_square45(c, pw);
                 }
                 //cairo_set_line_width(c,  0.5);
-                cairo_set_source_rgb(c, current_graph->pointcolor.r, current_graph->pointcolor.g, current_graph->pointcolor.b);
+                cairo_set_source_rgb(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b);
+                cairo_set_line_width(c, current_graph->points.linewidth);
                 cairo_stroke(c);
                 cairo_destroy(c);
             }
@@ -260,49 +261,46 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
     }
 }
 
-static void draw_point_o(cairo_t *cr, alpoint pw)
+static void draw_point_o(cairo_t *cr, alpoint2d pw)
 {
     cairo_new_sub_path(cr);
-    cairo_arc(cr, pw.x, pw.y, current_graph->pointsize/2.0, 0.0, 2*PI);
-    cairo_set_line_width(cr, 0.6);
+    cairo_arc(cr, pw.x, pw.y, current_graph->points.size * 0.5, 0.0, 2*PI);
+    //cairo_set_line_width(cr, 0.6);
 }
 
-static void draw_point_x(cairo_t *cr, alpoint pw)
+static void draw_point_x(cairo_t *cr, alpoint2d pw)
 {
-    const double offset = sqrt(0.125 * current_graph->pointsize * current_graph->pointsize);
+    const double offset = sqrt(0.125 * current_graph->points.size * current_graph->points.size);
     cairo_move_to(cr, pw.x - offset, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y + offset);
     cairo_move_to(cr, pw.x - offset, pw.y + offset);
     cairo_line_to(cr, pw.x + offset, pw.y - offset);
-    cairo_set_line_width(cr, 0.8);
 }
 
-static void draw_point_plus(cairo_t *cr, alpoint pw)
+static void draw_point_plus(cairo_t *cr, alpoint2d pw)
 {
-    cairo_move_to(cr, pw.x - current_graph->pointsize * 0.5, pw.y);
-    cairo_line_to(cr, pw.x + current_graph->pointsize * 0.5, pw.y);
-    cairo_move_to(cr, pw.x, pw.y - current_graph->pointsize * 0.5);
-    cairo_line_to(cr, pw.x, pw.y + current_graph->pointsize * 0.5);
-    cairo_set_line_width(cr, 0.8);
+    cairo_move_to(cr, pw.x - current_graph->points.size * 0.5, pw.y);
+    cairo_line_to(cr, pw.x + current_graph->points.size * 0.5, pw.y);
+    cairo_move_to(cr, pw.x, pw.y - current_graph->points.size * 0.5);
+    cairo_line_to(cr, pw.x, pw.y + current_graph->points.size * 0.5);
 }
 
-static void draw_point_star(cairo_t *cr, alpoint pw)
+static void draw_point_star(cairo_t *cr, alpoint2d pw)
 {
-    const double offset = sqrt(0.125 * current_graph->pointsize * current_graph->pointsize);
+    const double offset = sqrt(0.125 * current_graph->points.size * current_graph->points.size);
     cairo_move_to(cr, pw.x - offset, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y + offset);
     cairo_move_to(cr, pw.x - offset, pw.y + offset);
     cairo_line_to(cr, pw.x + offset, pw.y - offset);
-    cairo_move_to(cr, pw.x - current_graph->pointsize * 0.5, pw.y);
-    cairo_line_to(cr, pw.x + current_graph->pointsize * 0.5, pw.y);
-    cairo_move_to(cr, pw.x, pw.y - current_graph->pointsize * 0.5);
-    cairo_line_to(cr, pw.x, pw.y + current_graph->pointsize * 0.5);
-    cairo_set_line_width(cr, 0.8);
+    cairo_move_to(cr, pw.x - current_graph->points.size * 0.5, pw.y);
+    cairo_line_to(cr, pw.x + current_graph->points.size * 0.5, pw.y);
+    cairo_move_to(cr, pw.x, pw.y - current_graph->points.size * 0.5);
+    cairo_line_to(cr, pw.x, pw.y + current_graph->points.size * 0.5);
 }
 
-static void draw_point_square(cairo_t *cr, alpoint pw)
+static void draw_point_square(cairo_t *cr, alpoint2d pw)
 {
-    const double offset = sqrt(0.125 * current_graph->pointsize * current_graph->pointsize);
+    const double offset = sqrt(0.125 * current_graph->points.size * current_graph->points.size);
     cairo_move_to(cr, pw.x - offset, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y + offset);
@@ -312,9 +310,9 @@ static void draw_point_square(cairo_t *cr, alpoint pw)
     cairo_set_line_width(cr, 0.8);
 }
 
-static void draw_point_square45(cairo_t *cr, alpoint pw)
+static void draw_point_square45(cairo_t *cr, alpoint2d pw)
 {
-    const double offset = current_graph->pointsize * 0.5;
+    const double offset = current_graph->points.size * 0.5;
     cairo_move_to(cr, pw.x, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y);
     cairo_line_to(cr, pw.x, pw.y + offset);
@@ -329,7 +327,7 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
 {
     cairo_t *c;
     unsigned int i, j;
-    alpoint p0, p1, p2, p3;
+    alpoint2d p0, p1, p2, p3;
 
     if (fig->ngraph == 0) {
 #ifdef CAIRO_DEBUG

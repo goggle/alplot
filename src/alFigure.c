@@ -108,12 +108,11 @@ void alfigure_print(alfigure *fig)
 /*
  * Transorm the figure coordinates fig_p into screen coordinates
  */
-alpoint fig_to_world(alpoint fig_p, alfigure *fig)
+alpoint2d fig_to_world(alpoint2d fig_p, alfigure *fig)
 {
-    alpoint world_p = {FIGURE_X, FIGURE_Y};
+    alpoint2d world_p = {FIGURE_X, FIGURE_Y};
     world_p.x += (fig_p.x - fig->xlim[0])/(fig->xlim[1] - fig->xlim[0]) * FIGURE_WIDTH;
     world_p.y -= (fig_p.y - fig->ylim[0])/(fig->ylim[1] - fig->ylim[0]) * FIGURE_HEIGHT;
-
     return world_p;
 }
 

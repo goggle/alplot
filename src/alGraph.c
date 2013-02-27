@@ -23,7 +23,7 @@ static int algraph_list_remove();
 //    if (g == NULL)
 //        alerror("algraph_create: Could not allocate memory!");
 
-//    g->data = (alpoint *) malloc(ndata * sizeof(alpoint *));
+//    g->data = (alpoint2d *) malloc(ndata * sizeof(alpoint2d *));
 //    if (g->data == NULL)
 //        alerror("algraph_create: Could not allocate memory!");
 //
@@ -74,13 +74,28 @@ void algraph_create()
     g->linecolor.alpha = 1.0;
     g->name = NULL;
     g->legend = false;
-    g->show_points = false;
-    g->pointstyle = 0;
-    g->pointsize = 5.0;
-    g->pointcolor.r = g->pointcolor.g = g->pointcolor.b = 0.0;
-    g->pointcolor.alpha = 1.0;
+    //g->show_points = false;
+    //g->pointstyle = 0;
+    //g->pointsize = 5.0;
+    //g->pointcolor.r = g->pointcolor.g = g->pointcolor.b = 0.0;
+    //g->pointcolor.alpha = 1.0;
     g->bezier_control_points = NULL;
     g->interpolation_method = 0;
+
+    g->points.show = false;
+    g->points.style = 0;
+    g->points.size = 5.0;
+    g->points.linewidth = 1.0;
+    g->points.edgecolor.r = g->points.edgecolor.g = g->points.edgecolor.b = 1.0;
+    g->points.edgecolor.alpha = 1.0;
+    g->points.facecolor.r = g->points.facecolor.g = g->points.facecolor.b = 1.0;
+    g->points.facecolor.alpha = 1.0;
+    g->points.filled = false;
+    //g->points = {.show = false, .style = 0, .size = 5.0, .linewidth = 1.0, 
+    //    .edgecolor = {0.0, 0.0, 0.0, 1.0}, .facecolor = {0.0, 0.0, 0.0, 1.0}, 
+    //    .filled = false };
+
+
     algraph_list_add(g);
 }
 
@@ -94,7 +109,7 @@ void algraph_set_data(algraph *g, double datax[], double datay[], unsigned int n
     unsigned int i;
     if (g == NULL)
         aluierror("algraph_set_data: Graph not initialised.");
-    g->data = (alpoint *) malloc(n * sizeof(alpoint));
+    g->data = (alpoint2d *) malloc(n * sizeof(alpoint2d));
     if (g->data == NULL)
         alerror("algraph_set_data: Could not allocate memory!");
     for (i = 0; i < n; i++) {
@@ -133,11 +148,15 @@ void algraph_print(algraph *g)
     printf("Line color: (%.2f, %.2f, %.2f)\n", g->linecolor.r, g->linecolor.g, g->linecolor.b);
     printf("Line alpha value: %.2f\n", g->linecolor.alpha);
     printf("Legend: %d\n", g->legend);
-    printf("Show points: %d\n", g->show_points);
-    printf("Point style: %d\n", g->pointstyle);
-    printf("Point size: %.1f\n", g->pointsize);
-    printf("Point color: (%.2f, %.2f, %.2f)\n", g->pointcolor.r, g->pointcolor.g, g->pointcolor.b);
-    printf("Point alpha value: %.2f\n", g->pointcolor.alpha);
+    printf("Point options:\n");
+    printf("Show points: %d\n", g->points.show);
+    printf("Point style: %d\n", g->points.style);
+    printf("Point size: %.1f\n", g->points.size);
+    printf("Point edge color: (%.2f, %.2f, %.2f)\n", g->points.edgecolor.r, g->points.edgecolor.g, g->points.edgecolor.b);
+    printf("Point edge alpha value: %.2f\n", g->points.edgecolor.alpha);
+    printf("Point face color: (%.2f, %.2f, %.2f)\n", g->points.facecolor.r, g->points.facecolor.g, g->points.facecolor.b);
+    printf("Point face alpha value: %.2f\n", g->points.facecolor.alpha);
+    printf("Points filled: %d\n", g->points.filled);
     printf("Interpolation method: %d\n", g->interpolation_method);
     printf("Bezier spline control points:\n");
     if (g->bezier_control_points != NULL) {
@@ -197,33 +216,51 @@ void algraph_unset_legend(algraph *g)
 
 void algraph_set_show_points(algraph *g)
 {
-    g->show_points = true;
+    g->points.show = true;
 }
 
 void algraph_unset_show_points(algraph *g)
 {
-    g->show_points = false;
+    g->points.show = false;
 }
 
-void algraph_set_pointstyle(algraph *g, int style)
+void algraph_set_pointstyle(algraph *g, unsigned int style)
 {
-    if (style < 0 || style > 5)
+    if (style > 5)
         aluierror("algraph_set_pointstyle: Point style not valid");
-    g->pointstyle = style;
+    g->points.style = style;
 }
 
 void algraph_set_pointsize(algraph *g, double size)
 {
-    g->pointsize = size;
+    g->points.size = size;
 }
 
 
-void algraph_set_pointcolor(algraph *graph, double r, double g, double b, double alpha)
+void algraph_set_facecolor(algraph *graph, double r, double g, double b, double alpha)
 {
-    graph->pointcolor.r = r;
-    graph->pointcolor.g = g;
-    graph->pointcolor.b = b;
-    graph->pointcolor.alpha = alpha;
+    graph->points.facecolor.r = r;
+    graph->points.facecolor.g = g;
+    graph->points.facecolor.b = b;
+    graph->points.facecolor.alpha = alpha;
+}
+
+void algraph_set_edgecolor(algraph *graph, double r, double g, double b, double alpha)
+{
+    graph->points.edgecolor.r = r;
+    graph->points.edgecolor.g = g;
+    graph->points.edgecolor.b = b;
+    graph->points.edgecolor.alpha = alpha;
+}
+
+void algraph_set_points_filled(algraph *g)
+{
+    g->points.filled = true;
+}
+
+void algraph_unset_points_filled(algraph *g)
+{
+    g->points.filled = false;
 }
 
 
@@ -260,7 +297,7 @@ void algraph_calculate_bezier_control_points(algraph *g)
     if (g->ndata == 0)
         alerror("algraph_calculate_bezier_control_points: No data specified!");
 
-    g->bezier_control_points = (alpoint*) malloc(n_control_points * sizeof(alpoint));
+    g->bezier_control_points = (alpoint2d*) malloc(n_control_points * sizeof(alpoint2d));
     mdiag = (double *) malloc((g->ndata - 1) * sizeof(double));
     supdiag = (double *) malloc((g->ndata - 1) * sizeof(double));
     subdiag = (double *) malloc((g->ndata - 1) * sizeof(double));
