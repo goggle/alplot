@@ -42,11 +42,13 @@ int main(void)
     algraph_set_show_points(current_graph);
     algraph_set_interpolation_method(current_graph, 1);
     algraph_unset_show_graphline(current_graph);
-    algraph_set_pointstyle(current_graph, 4);
-    algraph_set_point_linewidth(current_graph, 1.5);
+    algraph_set_pointstyle(current_graph, 0);
+    algraph_set_point_linewidth(current_graph, 1.0);
+    algraph_set_pointsize(current_graph, 10.0);
     algraph_set_linecolor(current_graph, 0.2, 0.0, 0.9, 1.0);
-    algraph_set_edgecolor(current_graph, 1.0, 0.0, 0.0, 0.5);
-    algraph_set_facecolor(current_graph, 0.0, 0.0, 1.0, 0.5);
+    algraph_set_edgecolor(current_graph, 1.0, 0.0, 0.0, 1.0);
+    algraph_set_points_filled(current_graph);
+    algraph_set_facecolor(current_graph, 0.0, 0.1, 0.4, 0.5);
     //algraph_print(&(graph_list.root->graph));
     //algraph_list_print();
     //algraph_list_print();

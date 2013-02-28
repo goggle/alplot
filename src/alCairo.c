@@ -290,10 +290,10 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
                         break;
                     default: break;
                 }
-                cairo_set_source_rgba(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
-                        current_graph->points.edgecolor.alpha);
-                cairo_set_line_width(c, current_graph->points.linewidth);
-                cairo_stroke(c);
+                //cairo_set_source_rgba(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                //        current_graph->points.edgecolor.alpha);
+                //cairo_set_line_width(c, current_graph->points.linewidth);
+                //cairo_stroke(c);
                 cairo_destroy(c);
             }
         }
@@ -303,8 +303,20 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
 static void draw_point_o(cairo_t *cr, alpoint2d pw)
 {
     cairo_new_sub_path(cr);
+    if (current_graph->points.filled) {
+        cairo_arc(cr, pw.x, pw.y, current_graph->points.size * 0.5, 0.0, 2*PI);
+        cairo_close_path(cr);
+        cairo_set_source_rgba(cr, current_graph->points.facecolor.r, current_graph->points.facecolor.g, current_graph->points.facecolor.b, 
+                current_graph->points.facecolor.alpha);
+        cairo_fill(cr);
+    }
+    cairo_new_sub_path(cr);
     cairo_arc(cr, pw.x, pw.y, current_graph->points.size * 0.5, 0.0, 2*PI);
     //cairo_set_line_width(cr, 0.6);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 }
 
 static void draw_point_x(cairo_t *cr, alpoint2d pw)
@@ -314,6 +326,10 @@ static void draw_point_x(cairo_t *cr, alpoint2d pw)
     cairo_line_to(cr, pw.x + offset, pw.y + offset);
     cairo_move_to(cr, pw.x - offset, pw.y + offset);
     cairo_line_to(cr, pw.x + offset, pw.y - offset);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 }
 
 static void draw_point_plus(cairo_t *cr, alpoint2d pw)
@@ -322,6 +338,10 @@ static void draw_point_plus(cairo_t *cr, alpoint2d pw)
     cairo_line_to(cr, pw.x + current_graph->points.size * 0.5, pw.y);
     cairo_move_to(cr, pw.x, pw.y - current_graph->points.size * 0.5);
     cairo_line_to(cr, pw.x, pw.y + current_graph->points.size * 0.5);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 }
 
 static void draw_point_star(cairo_t *cr, alpoint2d pw)
@@ -335,27 +355,55 @@ static void draw_point_star(cairo_t *cr, alpoint2d pw)
     cairo_line_to(cr, pw.x + current_graph->points.size * 0.5, pw.y);
     cairo_move_to(cr, pw.x, pw.y - current_graph->points.size * 0.5);
     cairo_line_to(cr, pw.x, pw.y + current_graph->points.size * 0.5);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 }
 
 static void draw_point_square(cairo_t *cr, alpoint2d pw)
 {
     const double offset = sqrt(0.125 * current_graph->points.size * current_graph->points.size);
-    cairo_move_to(cr, pw.x - offset, pw.y - offset);
-    cairo_line_to(cr, pw.x + offset, pw.y - offset);
-    cairo_line_to(cr, pw.x + offset, pw.y + offset);
-    cairo_line_to(cr, pw.x - offset, pw.y + offset);
-    cairo_close_path(cr);
+
+    if (current_graph->points.filled) {
+        cairo_rectangle(cr, pw.x - offset, pw.y - offset,  2 * offset, 2 * offset);
+        cairo_set_source_rgba(cr, current_graph->points.facecolor.r, current_graph->points.facecolor.g, current_graph->points.facecolor.b, 
+                current_graph->points.facecolor.alpha);
+        cairo_fill(cr);
+    }
+
+    cairo_rectangle(cr, pw.x - offset, pw.y - offset, 2  * offset, 2 * offset);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 
 }
 
 static void draw_point_square45(cairo_t *cr, alpoint2d pw)
 {
     const double offset = current_graph->points.size * 0.5;
+
+    if (current_graph->points.filled) {
+        cairo_move_to(cr, pw.x, pw.y - offset);
+        cairo_line_to(cr, pw.x + offset, pw.y);
+        cairo_line_to(cr, pw.x, pw.y + offset);
+        cairo_line_to(cr, pw.x - offset, pw.y);
+        cairo_close_path(cr);
+        cairo_set_source_rgba(cr, current_graph->points.facecolor.r, current_graph->points.facecolor.g, current_graph->points.facecolor.b, 
+                current_graph->points.facecolor.alpha);
+        cairo_fill(cr);
+    }
+
     cairo_move_to(cr, pw.x, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y);
     cairo_line_to(cr, pw.x, pw.y + offset);
     cairo_line_to(cr, pw.x - offset, pw.y);
     cairo_close_path(cr);
+    cairo_set_line_width(cr, current_graph->points.linewidth);
+    cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                current_graph->points.edgecolor.alpha);
+    cairo_stroke(cr);
 }
 
 
