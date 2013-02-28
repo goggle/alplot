@@ -41,9 +41,6 @@ typedef struct
     double *subyticks;
     unsigned int nsubyticks;
 
-    algraph *graph; /* FIXME */
-    alline *line; /* FIXME */
-
     unsigned int ngraph; /* number of graphs in this figure */
     unsigned int *graph_id; /* contains the ids of the graphs */
 

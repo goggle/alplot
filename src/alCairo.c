@@ -225,7 +225,7 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
     unsigned int i, j;
     alpoint2d pw;
 
-    if (fig->graph == NULL) {
+    if (fig->ngraph == 0) {
 #ifdef CAIRO_DEBUG
         printf("draw_points: No graph specified.\n");
 #endif

@@ -39,20 +39,6 @@ typedef struct
     int linestyle; /* 0: solid, 1: dashed */
     char *name;
     bool legend;
-    //bool show_points;
-
-    /* 
-     * point styles:
-     * 0: o
-     * 1: x
-     * 2: +
-     * 3: *
-     * 4: square
-     * 5: square rotated by 45 degrees
-     */
-    //int pointstyle;
-    //double pointsize;
-    //rgba_color pointcolor;
     int interpolation_method; /* 0: Cubic Bezier spline interpolation, 1: linear interpolation */
     alpoint2d *bezier_control_points;
     alpoint points;
