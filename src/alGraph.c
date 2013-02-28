@@ -236,6 +236,11 @@ void algraph_set_pointsize(algraph *g, double size)
     g->points.size = size;
 }
 
+void algraph_set_point_linewidth(algraph *g, double lw)
+{
+    g->points.linewidth = lw;
+}
+
 
 void algraph_set_facecolor(algraph *graph, double r, double g, double b, double alpha)
 {

@@ -42,9 +42,11 @@ int main(void)
     algraph_set_show_points(current_graph);
     algraph_set_interpolation_method(current_graph, 1);
     algraph_unset_show_graphline(current_graph);
-    algraph_set_pointstyle(current_graph, 5);
+    algraph_set_pointstyle(current_graph, 4);
+    algraph_set_point_linewidth(current_graph, 1.5);
     algraph_set_linecolor(current_graph, 0.2, 0.0, 0.9, 1.0);
-    algraph_set_edgecolor(current_graph, 1.0, 0.0, 0.0, 1.0);
+    algraph_set_edgecolor(current_graph, 1.0, 0.0, 0.0, 0.5);
+    algraph_set_facecolor(current_graph, 0.0, 0.0, 1.0, 0.5);
     //algraph_print(&(graph_list.root->graph));
     //algraph_list_print();
     //algraph_list_print();
@@ -53,8 +55,8 @@ int main(void)
     
     alfigure *fig = alfigure_create();
     alfigure_add_graph(fig, current_graph);
-    alfigure_create_subxticks(fig, 3);
-    alfigure_create_subyticks(fig, 3);
+    alfigure_create_subxticks(fig, 5);
+    alfigure_create_subyticks(fig, 5);
 
     algraph_create();
     for (i = 0; i < N; i++) {

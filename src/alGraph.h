@@ -97,6 +97,7 @@ void algraph_set_show_points(algraph *g);
 void algraph_unset_show_points(algraph *g);
 void algraph_set_pointstyle(algraph *g, unsigned int style);
 void algraph_set_pointsize(algraph *g, double size);
+void algraph_set_point_linewidth(algraph *g, double width);
 void algraph_set_facecolor(algraph *graph, double r, double g, double b, double alpha);
 void algraph_set_edgecolor(algraph *graph, double r, double g, double b, double alpha);
 void algraph_set_points_filled(algraph *g);

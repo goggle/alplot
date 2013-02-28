@@ -236,23 +236,62 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
         if (algraph_get(fig->graph_id[j])) {
             if (current_graph->points.show) {
                 c = cairo_create(cs);
-                for (i = 0; i < current_graph->ndata; i++) {
-                    pw = fig_to_world(current_graph->data[i], fig);
-                    if (current_graph->points.style == 0)
-                        draw_point_o(c, pw);
-                    else if (current_graph->points.style == 1)
-                        draw_point_x(c, pw);
-                    else if (current_graph->points.style == 2)
-                        draw_point_plus(c, pw);
-                    else if (current_graph->points.style == 3)
-                        draw_point_star(c, pw);
-                    else if (current_graph->points.style == 4)
-                        draw_point_square(c, pw);
-                    else if (current_graph->points.style == 5)
-                        draw_point_square45(c, pw);
+                //for (i = 0; i < current_graph->ndata; i++) {
+                //    pw = fig_to_world(current_graph->data[i], fig);
+                //    if (current_graph->points.style == 0)
+                //        draw_point_o(c, pw);
+                //    else if (current_graph->points.style == 1)
+                //        draw_point_x(c, pw);
+                //    else if (current_graph->points.style == 2)
+                //        draw_point_plus(c, pw);
+                //    else if (current_graph->points.style == 3)
+                //        draw_point_star(c, pw);
+                //    else if (current_graph->points.style == 4)
+                //        draw_point_square(c, pw);
+                //    else if (current_graph->points.style == 5)
+                //        draw_point_square45(c, pw);
+                //}
+                switch (current_graph->points.style) {
+                    case 0:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_o(c, pw);
+                        }
+                        break;
+                    case 1:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_x(c, pw);
+                        }
+                        break;
+                    case 2:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_plus(c, pw);
+                        }
+                        break;
+                    case 3:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_star(c, pw);
+                        }
+                        break;
+                    case 4:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_square(c, pw);
+                        }
+                        break;
+                    case 5:
+                        for (i = 0; i < current_graph->ndata; i++) {
+                            pw = fig_to_world(current_graph->data[i], fig);
+                            draw_point_square45(c, pw);
+                        }
+                        break;
+                    default: break;
                 }
-                //cairo_set_line_width(c,  0.5);
-                cairo_set_source_rgb(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b);
+                cairo_set_source_rgba(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
+                        current_graph->points.edgecolor.alpha);
                 cairo_set_line_width(c, current_graph->points.linewidth);
                 cairo_stroke(c);
                 cairo_destroy(c);
@@ -305,9 +344,8 @@ static void draw_point_square(cairo_t *cr, alpoint2d pw)
     cairo_line_to(cr, pw.x + offset, pw.y - offset);
     cairo_line_to(cr, pw.x + offset, pw.y + offset);
     cairo_line_to(cr, pw.x - offset, pw.y + offset);
-    //cairo_line_to(cr, pw.x - offset, pw.y + offset);
     cairo_close_path(cr);
-    cairo_set_line_width(cr, 0.8);
+
 }
 
 static void draw_point_square45(cairo_t *cr, alpoint2d pw)
@@ -318,8 +356,6 @@ static void draw_point_square45(cairo_t *cr, alpoint2d pw)
     cairo_line_to(cr, pw.x, pw.y + offset);
     cairo_line_to(cr, pw.x - offset, pw.y);
     cairo_close_path(cr);
-    cairo_set_line_width(cr, 0.8);
-
 }
 
 
