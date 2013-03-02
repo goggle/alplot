@@ -23,6 +23,8 @@ static void draw_point_star(cairo_t *cr, alpoint2d pw);
 static void draw_point_square(cairo_t *cr, alpoint2d pw);
 static void draw_point_square45(cairo_t *cr, alpoint2d pw);
 static void draw_graph(cairo_surface_t *cs, alfigure *fig);
+static void clip_graph(cairo_t *cr);
+static bool point_in_figure(alpoint2d pw);
 
 
 cairo_surface_t* alcairo_open_pdf(const char *fname)
@@ -39,10 +41,11 @@ void alcairo_draw_figure(cairo_surface_t *cs, alfigure *fig)
     cairo_t *c;
     c = cairo_create(cs);
     cairo_move_to(c, FIGURE_X, FIGURE_Y);
-    cairo_line_to(c, FIGURE_X + FIGURE_WIDTH, FIGURE_Y);
-    cairo_line_to(c, FIGURE_X + FIGURE_WIDTH, FIGURE_Y - FIGURE_HEIGHT);
-    cairo_line_to(c, FIGURE_X, FIGURE_Y - FIGURE_HEIGHT);
-    cairo_line_to(c, FIGURE_X, FIGURE_Y);
+    //cairo_line_to(c, FIGURE_X + FIGURE_WIDTH, FIGURE_Y);
+    //cairo_line_to(c, FIGURE_X + FIGURE_WIDTH, FIGURE_Y - FIGURE_HEIGHT);
+    //cairo_line_to(c, FIGURE_X, FIGURE_Y - FIGURE_HEIGHT);
+    //cairo_line_to(c, FIGURE_X, FIGURE_Y);
+    cairo_rectangle(c, FIGURE_X, FIGURE_Y, FIGURE_WIDTH, -FIGURE_HEIGHT);
     cairo_set_line_width(c, 1.5);
     cairo_stroke(c);
     cairo_destroy(c);
@@ -255,37 +258,43 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
                     case 0:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_o(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_o(c, pw);
                         }
                         break;
                     case 1:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_x(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_x(c, pw);
                         }
                         break;
                     case 2:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_plus(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_plus(c, pw);
                         }
                         break;
                     case 3:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_star(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_star(c, pw);
                         }
                         break;
                     case 4:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_square(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_square(c, pw);
                         }
                         break;
                     case 5:
                         for (i = 0; i < current_graph->ndata; i++) {
                             pw = fig_to_world(current_graph->data[i], fig);
-                            draw_point_square45(c, pw);
+                            if (point_in_figure(pw))
+                                draw_point_square45(c, pw);
                         }
                         break;
                     default: break;
@@ -312,7 +321,6 @@ static void draw_point_o(cairo_t *cr, alpoint2d pw)
     }
     cairo_new_sub_path(cr);
     cairo_arc(cr, pw.x, pw.y, current_graph->points.size * 0.5, 0.0, 2*PI);
-    //cairo_set_line_width(cr, 0.6);
     cairo_set_line_width(cr, current_graph->points.linewidth);
     cairo_set_source_rgba(cr, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
                 current_graph->points.edgecolor.alpha);
@@ -419,10 +427,15 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
 #endif
         return;
     }
+
+
     for (j = 0; j < fig->ngraph; j++) {
         if (algraph_get(fig->graph_id[j])) {
             if (current_graph->show_graphline) {
                 c = cairo_create(cs);
+
+                //cairo_set_source_surface(c, cs, 1, 1);
+
                 if (current_graph->interpolation_method == 0) {
                     for (i = 0; i < current_graph->ndata - 1; i++) {
                         p0 = fig_to_world(current_graph->data[i], fig);
@@ -444,6 +457,9 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
                 }
                 cairo_set_line_width(c, current_graph->linewidth);
                 cairo_set_source_rgb(c, current_graph->linecolor.r, current_graph->linecolor.g, current_graph->linecolor.b);
+
+                clip_graph(c);
+
                 cairo_stroke(c);
                 cairo_destroy(c);
             }
@@ -451,3 +467,24 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
     }
 }
 
+static void clip_graph(cairo_t *cr)
+{
+    cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+    cairo_rectangle(cr, FIGURE_X, FIGURE_Y, FIGURE_WIDTH, -FIGURE_HEIGHT);
+    //cairo_set_source_rgba(cr, 0, 0, 0, 0);
+    cairo_clip_preserve(cr);
+}
+
+
+/*
+ * Check if a given point is in the figure window.
+ */
+static bool point_in_figure(alpoint2d pw)
+{
+    if (pw.x >= FIGURE_X
+            && pw.x <= FIGURE_X + FIGURE_WIDTH
+            && pw.y >= FIGURE_Y - FIGURE_HEIGHT
+            && pw.y <= FIGURE_Y)
+        return true;
+    return false;
+}

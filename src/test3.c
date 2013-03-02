@@ -17,7 +17,7 @@ int main(void)
     unsigned int i;
     double x;
     for (i = 0; i < N; i++) {
-        x = -1.0 + 4*i/100.0;
+        x = -1.0 + 5*i/100.0;
         datax[i] = x;
         datay[i] = 0.5*sin(4*x);
     }
@@ -41,7 +41,6 @@ int main(void)
     algraph_set_data(current_graph, datax, datay, N);
     algraph_set_show_points(current_graph);
     algraph_set_interpolation_method(current_graph, 1);
-    algraph_unset_show_graphline(current_graph);
     algraph_set_pointstyle(current_graph, 0);
     algraph_set_point_linewidth(current_graph, 1.0);
     algraph_set_pointsize(current_graph, 10.0);
@@ -62,7 +61,8 @@ int main(void)
 
     algraph_create();
     for (i = 0; i < N; i++) {
-        x = -1.0 + 4*i/100.0;
+        //x = -1.0 + 4*i/100.0;
+        x = -1.0 + 5*i/100.0;
         datax[i] = x;
         datay[i] = 0.5*cos(4*x);
     }
