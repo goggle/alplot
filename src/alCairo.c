@@ -433,6 +433,7 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
         if (algraph_get(fig->graph_id[j])) {
             if (current_graph->show_graphline) {
                 c = cairo_create(cs);
+                clip_graph(c);
 
                 //cairo_set_source_surface(c, cs, 1, 1);
 
@@ -458,7 +459,7 @@ static void draw_graph(cairo_surface_t *cs, alfigure *fig)
                 cairo_set_line_width(c, current_graph->linewidth);
                 cairo_set_source_rgb(c, current_graph->linecolor.r, current_graph->linecolor.g, current_graph->linecolor.b);
 
-                clip_graph(c);
+                //clip_graph(c);
 
                 cairo_stroke(c);
                 cairo_destroy(c);
@@ -471,8 +472,9 @@ static void clip_graph(cairo_t *cr)
 {
     cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
     cairo_rectangle(cr, FIGURE_X, FIGURE_Y, FIGURE_WIDTH, -FIGURE_HEIGHT);
-    //cairo_set_source_rgba(cr, 0, 0, 0, 0);
-    cairo_clip_preserve(cr);
+    //cairo_set_source_rgba(cr, 0, 0, 1, 1);
+    //cairo_clip_preserve(cr);
+    cairo_clip(cr);
 }
 
 
