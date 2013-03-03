@@ -7,3 +7,4 @@ TODO
 - Add different line styles.
 - Add a histogram feature.
 - Add support for more than one figure.
+- Add a flexible output size model.
