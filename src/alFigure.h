@@ -41,6 +41,9 @@ typedef struct
     double *subyticks;
     unsigned int nsubyticks;
 
+    bool show_xaxis;
+    bool show_yaxis;
+
     unsigned int ngraph; /* number of graphs in this figure */
     unsigned int *graph_id; /* contains the ids of the graphs */
 
@@ -62,6 +65,11 @@ void alfigure_create_subyticks(alfigure *fig, unsigned int n);
 
 void alfigure_print_subxticks(alfigure *fig);
 void alfigure_print_subyticks(alfigure *fig);
+
+void alfigure_set_show_xaxis(alfigure *fig);
+void alfigure_unset_show_xaxis(alfigure *fig);
+void alfigure_set_show_yaxis(alfigure *fig);
+void alfigure_unset_show_yaxis(alfigure *fig);
 
 void set_xlim(alfigure *fig, double xmin, double xmax);
 void set_ylim(alfigure *fig, double ymin, double ymax);

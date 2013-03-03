@@ -45,6 +45,9 @@ alfigure* alfigure_create()
     fig->subyticks = NULL;
     fig->nsubyticks = 0;
 
+    fig->show_xaxis = false;
+    fig->show_yaxis = false;
+
     fig->ngraph = 0;
     fig->graph_id = NULL;
     
@@ -200,6 +203,27 @@ void alfigure_set_show_ticks(alfigure *fig, bool north, bool east, bool south, b
     fig->show_ticks[1] = east;
     fig->show_ticks[2] = south;
     fig->show_ticks[3] = west;
+}
+
+
+void alfigure_set_show_xaxis(alfigure *fig)
+{
+    fig->show_xaxis = true;
+}
+
+void alfigure_unset_show_xaxis(alfigure *fig)
+{
+    fig->show_xaxis = false;
+}
+
+void alfigure_set_show_yaxis(alfigure *fig)
+{
+    fig->show_yaxis = true;
+}
+
+void alfigure_unset_show_yaxis(alfigure *fig)
+{
+    fig->show_yaxis = false;
 }
 
 void set_xlim(alfigure *fig, double xmin, double xmax)
