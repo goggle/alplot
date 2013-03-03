@@ -1,3 +1,4 @@
+#include "alDraw.h"
 #include "alCairo.h"
 #include "alCore.h"
 #include "alGraph.h"
@@ -6,7 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define EPS 1e-15
 
 
 static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc);
@@ -24,7 +24,7 @@ static void draw_point_square45(cairo_t *cr, alpoint2d pw);
 static void draw_graph(cairo_surface_t *cs, alfigure *fig);
 static void clip_graph(cairo_t *cr);
 static bool point_in_figure(alpoint2d pw);
-static void draw_arrow(cairo_surface_t *cs, double x1, double y1, double x2, double y2, double headlength, double angle, double linewidth, rgba_color col);
+static void draw_arrow(cairo_surface_t *cs, alpoint2d begin, alpoint2d end, double headlength, double angle, double linewidth, rgba_color col);
 static void draw_xaxis(cairo_surface_t *cs, alfigure *fig);
 static void draw_yaxis(cairo_surface_t *cs, alfigure *fig);
 
@@ -243,21 +243,6 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
         if (algraph_get(fig->graph_id[j])) {
             if (current_graph->points.show) {
                 c = cairo_create(cs);
-                //for (i = 0; i < current_graph->ndata; i++) {
-                //    pw = fig_to_world(current_graph->data[i], fig);
-                //    if (current_graph->points.style == 0)
-                //        draw_point_o(c, pw);
-                //    else if (current_graph->points.style == 1)
-                //        draw_point_x(c, pw);
-                //    else if (current_graph->points.style == 2)
-                //        draw_point_plus(c, pw);
-                //    else if (current_graph->points.style == 3)
-                //        draw_point_star(c, pw);
-                //    else if (current_graph->points.style == 4)
-                //        draw_point_square(c, pw);
-                //    else if (current_graph->points.style == 5)
-                //        draw_point_square45(c, pw);
-                //}
                 switch (current_graph->points.style) {
                     case 0:
                         for (i = 0; i < current_graph->ndata; i++) {
@@ -303,10 +288,6 @@ static void draw_points(cairo_surface_t *cs, alfigure *fig)
                         break;
                     default: break;
                 }
-                //cairo_set_source_rgba(c, current_graph->points.edgecolor.r, current_graph->points.edgecolor.g, current_graph->points.edgecolor.b,
-                //        current_graph->points.edgecolor.alpha);
-                //cairo_set_line_width(c, current_graph->points.linewidth);
-                //cairo_stroke(c);
                 cairo_destroy(c);
             }
         }
@@ -496,62 +477,81 @@ static bool point_in_figure(alpoint2d pw)
  *
  * The angle should be in [0, pi/2)
  */
-static void draw_arrow(cairo_surface_t *cs, double x1, double y1, double x2, double y2, double headlength, double angle, double linewidth, rgba_color col)
+//static void draw_arrow(cairo_surface_t *cs, double x1, double y1, double x2, double y2, double headlength, double angle, double linewidth, rgba_color col)
+//{
+//    //double m, q;
+//    double w, h;
+//    double norm;
+//    double v1x, v1y; /* normed vector from (x2, y2) in the direction of (x1, y1) */
+//    double v2x, v2y; /* normed vector from (x2, y2) perpendicular to the line */
+//    double px, py;
+//    cairo_t *cr;
+//
+//    if (fabs(x2 - x1) < EPS && fabs(y2 - y1) < EPS) {
+//        return;
+//    }
+//
+//    if (headlength <= 0.0 
+//            || angle > M_PI / 2.0 
+//            || angle < EPS) {
+//        return;
+//    }
+//
+//    cr = cairo_create(cs);
+//    cairo_move_to(cr, x1, y1);
+//    cairo_line_to(cr, x2, y2);
+//
+//    
+//    h = headlength * sin(angle);
+//
+//    if (headlength * headlength - h * h < 0) {
+//        cairo_destroy(cr);
+//        return;
+//    }
+//    w = sqrt(headlength * headlength - h * h);
+//
+//    norm = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+//    v1x = (x1 - x2) / norm;
+//    v1y = (y1 - y2) / norm;
+//    v2x = -v1y;
+//    v2y = v1x;
+//    px = x2 + v1x * w;
+//    py = y2 + v1y * w;
+//    px = px + v2x * h;
+//    py = py + v2y * h;
+//
+//    cairo_line_to(cr, px, py);
+//    cairo_move_to(cr, x2, y2);
+//
+//    px = x2 + v1x * w;
+//    py = y2 + v1y * w;
+//    px = px - v2x * h;
+//    py = py - v2y * h;
+//    
+//    cairo_line_to(cr, px, py);
+//    cairo_set_line_width(cr, linewidth);
+//    cairo_set_source_rgba(cr, col.r, col.g, col.b, col.alpha);
+//    cairo_stroke(cr);
+//    cairo_destroy(cr);
+//}
+//
+static void draw_arrow(cairo_surface_t *cs, alpoint2d begin, alpoint2d end, double headlength, double angle, double linewidth, rgba_color col)
 {
-    //double m, q;
-    double w, h;
-    double norm;
-    double v1x, v1y; /* normed vector from (x2, y2) in the direction of (x1, y1) */
-    double v2x, v2y; /* normed vector from (x2, y2) perpendicular to the line */
-    double px, py;
     cairo_t *cr;
-
-    if (fabs(x2 - x1) < EPS && fabs(y2 - y1) < EPS) {
-        return;
-    }
-
-    if (headlength <= 0.0 
-            || angle > M_PI / 2.0 
-            || angle < EPS) {
-        return;
-    }
-
-    cr = cairo_create(cs);
-    cairo_move_to(cr, x1, y1);
-    cairo_line_to(cr, x2, y2);
-
-    
-    h = headlength * sin(angle);
-
-    if (headlength * headlength - h * h < 0) {
+    alarrow arrow;
+    arrow = aldraw_calculate_arrow(begin, end, headlength, angle);
+    if (arrow.valid) {
+        cr = cairo_create(cs);
+        cairo_move_to(cr, arrow.begin.x, arrow.begin.y);
+        cairo_line_to(cr, arrow.end.x, arrow.end.y);
+        cairo_line_to(cr, arrow.head1.x, arrow.head1.y);
+        cairo_move_to(cr, arrow.end.x, arrow.end.y);
+        cairo_line_to(cr, arrow.head2.x, arrow.head2.y);
+        cairo_set_line_width(cr, linewidth);
+        cairo_set_source_rgba(cr, col.r, col.g, col.b, col.alpha);
+        cairo_stroke(cr);
         cairo_destroy(cr);
-        return;
     }
-    w = sqrt(headlength * headlength - h * h);
-
-    norm = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-    v1x = (x1 - x2) / norm;
-    v1y = (y1 - y2) / norm;
-    v2x = -v1y;
-    v2y = v1x;
-    px = x2 + v1x * w;
-    py = y2 + v1y * w;
-    px = px + v2x * h;
-    py = py + v2y * h;
-
-    cairo_line_to(cr, px, py);
-    cairo_move_to(cr, x2, y2);
-
-    px = x2 + v1x * w;
-    py = y2 + v1y * w;
-    px = px - v2x * h;
-    py = py - v2y * h;
-    
-    cairo_line_to(cr, px, py);
-    cairo_set_line_width(cr, linewidth);
-    cairo_set_source_rgba(cr, col.r, col.g, col.b, col.alpha);
-    cairo_stroke(cr);
-    cairo_destroy(cr);
 }
 
 /*
@@ -565,7 +565,7 @@ static void draw_xaxis(cairo_surface_t *cs, alfigure *fig)
     double y = fig_to_world(p1, fig).y;
     p1.y = y;
     p2.y = y;
-    draw_arrow(cs, p1.x, p1.y, p2.x, p2.y, 30, M_PI/6, 1.0, color);
+    draw_arrow(cs, p1, p2, 20.0, M_PI/8.0, 1.5, color);
 
 
 }
@@ -578,6 +578,6 @@ static void draw_yaxis(cairo_surface_t *cs, alfigure *fig)
     double x = fig_to_world(p1, fig).x;
     p1.x = x;
     p2.x = x;
-    draw_arrow(cs, p1.x, p1.y, p2.x, p2.y, 30, M_PI/6.0, 1.0, color);
+    draw_arrow(cs, p1, p2, 20.0, M_PI/8.0, 1.5, color);
 }
 
