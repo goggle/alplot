@@ -1,6 +1,5 @@
 #include "alFigure.h"
 #include "alGraph.h"
-#include "alLine.h"
 #include "alCairo.h"
 
 #include <stdio.h>
@@ -80,5 +79,6 @@ int main(void)
     alcairo_write_pdf(cs);
 
     algraph_list_clear();
+
     return 0;
 }

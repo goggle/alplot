@@ -533,7 +533,7 @@ static int algraph_list_remove()
 #endif
     unsigned int i;
     algraph_node *cur;
-    algraph_node *prev;
+    algraph_node *prev = NULL;
     
     /* if the list is empty, we just ensure assure that the current graph is set to NULL */
     if (graph_list.size == 0) {

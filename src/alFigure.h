@@ -3,16 +3,9 @@
 
 //#include "color.h"
 #include <stdbool.h>
-#include "alLine.h"
 #include "alCore.h"
 #include "alGraph.h"
 
-#define DEFAULT_SIZE_X (740)
-#define DEFAULT_SIZE_Y (520)
-#define FIGURE_X (70)
-#define FIGURE_Y (480)
-#define FIGURE_HEIGHT (400)
-#define FIGURE_WIDTH (600)
 
 
 typedef struct
@@ -41,6 +34,11 @@ typedef struct
     double *subyticks;
     unsigned int nsubyticks;
 
+    double tickwidth;
+    double subtickwidth;
+    double ticklength;
+    double subticklength;
+
     bool show_xaxis;
     bool show_yaxis;
 
@@ -50,8 +48,6 @@ typedef struct
 } alfigure;
 
 
-
-alpoint2d fig_to_world(alpoint2d fig_p, alfigure *fig);
 
 alfigure* alfigure_create();
 void alfigure_print(alfigure *fig);
@@ -73,6 +69,8 @@ void alfigure_unset_show_yaxis(alfigure *fig);
 
 void set_xlim(alfigure *fig, double xmin, double xmax);
 void set_ylim(alfigure *fig, double ymin, double ymax);
+
+unsigned int alfigure_get_nticks(alfigure *fig, char pos, bool subticks);
 
 
 #endif

@@ -1,5 +1,18 @@
+#include <stdlib.h>
 #include <math.h>
 #include "alDraw.h"
+
+
+/*
+ * Transorm the figure coordinates fig_p into screen coordinates
+ */
+alpoint2d fig_to_world(alpoint2d fig_p, alfigure *fig)
+{
+    alpoint2d world_p = {FIGURE_X, FIGURE_Y};
+    world_p.x += (fig_p.x - fig->xlim[0])/(fig->xlim[1] - fig->xlim[0]) * FIGURE_WIDTH;
+    world_p.y -= (fig_p.y - fig->ylim[0])/(fig->ylim[1] - fig->ylim[0]) * FIGURE_HEIGHT;
+    return world_p;
+}
 
 /*
  * Calculates the coordinates for an arrow from 'begin' to 'end' width a head length 'headlength' and
@@ -54,3 +67,93 @@ alarrow aldraw_calculate_arrow(alpoint2d begin, alpoint2d end, double headlength
     arrow.valid = true;
     return arrow;
 }
+
+
+/*
+ * Returns the coordinates of the ticks:
+ *
+ * fig: The figure object
+ * pos: 'n': north (xticks)
+ *      'e': east  (yticks)
+ *      's': south (xticks)
+ *      'w': west  (yticks)
+ * subticks: false: Draw the main ticks
+ *           true: Draw the subticks
+ */
+alline* aldraw_get_ticks(alfigure *fig, char pos, bool subticks)
+{
+    unsigned int i;
+    double d;
+    alline* ticks = NULL;
+    alpoint2d p = {0.0, 0.0};
+
+    if (pos == 'n' || pos == 's') {
+        if (pos == 's')
+            p.y = fig->ylim[0];
+        else
+            p.y = fig->ylim[1];
+
+            
+        if (!subticks) {
+            d = fig->ticklength * 0.5;
+            ticks = (alline *) malloc(fig->nxticks * sizeof(alline));
+            if (ticks == NULL)
+                alerror("get_ticks: Could not allocate memory!");
+            for (i = 0; i < fig->nxticks; i++) {
+                p.x = fig->xticks[i];
+                ticks[i].begin = ticks[i].end = fig_to_world(p, fig);
+                ticks[i].begin.y += d; /* bottom */
+                ticks[i].end.y -= d; /* top */
+            }
+        }
+        else {
+            d = fig->subticklength * 0.5;
+            ticks = (alline *) malloc(fig->nsubxticks * sizeof(alline));
+            if (ticks == NULL)
+                alerror("get_ticks: Could not allocate memory!");
+            for (i = 0; i < fig->nsubxticks; i++) {
+                p.x = fig->subxticks[i];
+                ticks[i].begin = ticks[i].end = fig_to_world(p, fig);
+                ticks[i].begin.y += d; /* bottom */
+                ticks[i].end.y -= d; /* top */
+            }
+        }
+    }
+
+    else if (pos == 'e' || pos == 'w') {
+        if (pos == 'w')
+            p.x = fig->xlim[0];
+        else
+            p.x = fig->xlim[1];
+
+        if (!subticks) {
+            d = fig->ticklength * 0.5;
+            ticks = (alline *) malloc(fig->nyticks * sizeof(alline));
+            if (ticks == NULL)
+                alerror("get_ticks: Could not allocate memory!");
+            for (i = 0; i < fig->nyticks; i++) {
+                p.y = fig->yticks[i];
+                ticks[i].begin = ticks[i].end = fig_to_world(p, fig);
+                ticks[i].begin.x -= d; /* left */
+                ticks[i].end.x += d; /* right */
+            }
+        }
+        else {
+            d = fig->subticklength * 0.5;
+            ticks = (alline *) malloc(fig->nsubyticks * sizeof(alline));
+            if (ticks == NULL)
+                alerror("get_ticks: Could not allocate memory!");
+            for (i = 0; i < fig->nsubyticks; i++) {
+                p.y = fig->subyticks[i];
+                ticks[i].begin = ticks[i].end = fig_to_world(p, fig);
+                ticks[i].begin.x -= d; /* left */
+                ticks[i].end.x += d; /* right */
+            }
+        }
+    }
+    return ticks;
+}
+
+
+
+

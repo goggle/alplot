@@ -4,7 +4,6 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include "alFigure.h"
-#include "alLine.h"
 #include "color.h"
 
 

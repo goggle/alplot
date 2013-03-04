@@ -4,6 +4,7 @@
 #include <assert.h>
 
 
+
 alfigure* alfigure_create()
 {
     static int id = 1;
@@ -44,6 +45,11 @@ alfigure* alfigure_create()
     fig->nsubxticks = 0;
     fig->subyticks = NULL;
     fig->nsubyticks = 0;
+
+    fig->tickwidth = 1.5;
+    fig->subtickwidth = 1.0;
+    fig->ticklength = 12.0;
+    fig->subticklength = 6.0;
 
     fig->show_xaxis = false;
     fig->show_yaxis = false;
@@ -108,16 +114,6 @@ void alfigure_print(alfigure *fig)
 
 
 
-/*
- * Transorm the figure coordinates fig_p into screen coordinates
- */
-alpoint2d fig_to_world(alpoint2d fig_p, alfigure *fig)
-{
-    alpoint2d world_p = {FIGURE_X, FIGURE_Y};
-    world_p.x += (fig_p.x - fig->xlim[0])/(fig->xlim[1] - fig->xlim[0]) * FIGURE_WIDTH;
-    world_p.y -= (fig_p.y - fig->ylim[0])/(fig->ylim[1] - fig->ylim[0]) * FIGURE_HEIGHT;
-    return world_p;
-}
 
 
 double alfigure_get_height(alfigure *fig)
@@ -242,3 +238,23 @@ void set_ylim(alfigure *fig, double ymin, double ymax)
     fig->ylim[1] = ymax;
 }
 
+/*
+ * Get the number of ticks:
+ */
+unsigned int alfigure_get_nticks(alfigure *fig, char pos, bool subticks)
+{
+    unsigned int n = 0;
+    if (pos == 'n' || pos == 's') {
+        if (!subticks)
+            n = fig->nxticks;
+        else
+            n = fig->nsubxticks;
+    }
+    else if (pos == 'e' || pos == 'w') {
+        if (!subticks)
+            n = fig->nyticks;
+        else
+            n = fig->nsubyticks;
+    }
+    return n;
+}

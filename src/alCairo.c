@@ -9,11 +9,13 @@
 
 
 
-static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc);
-static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc);
-static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc);
-static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc);
-static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool n, bool e, bool s, bool w);
+//static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+//static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+//static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+//static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc);
+//static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool n, bool e, bool s, bool w);
+static void draw_ticks_(cairo_surface_t *cs, alfigure *fig, char pos, bool subticks);
+static void draw_ticks(cairo_surface_t *cs, alfigure *fig);
 static void draw_points(cairo_surface_t *cs, alfigure *fig);
 static void draw_point_o(cairo_t *cr, alpoint2d pw);
 static void draw_point_x(cairo_t *cr, alpoint2d pw);
@@ -52,8 +54,9 @@ void alcairo_draw_figure(cairo_surface_t *cs, alfigure *fig)
     cairo_stroke(c);
     cairo_destroy(c);
 
-    draw_ticks(cs, fig, fig->show_ticks[0], fig->show_ticks[1], fig->show_ticks[2], fig->show_ticks[3]);
+    //draw_ticks(cs, fig, fig->show_ticks[0], fig->show_ticks[1], fig->show_ticks[2], fig->show_ticks[3]);
 
+    draw_ticks(cs, fig);
     draw_graph(cs, fig);
     draw_points(cs, fig);
     draw_xaxis(cs, fig);
@@ -67,163 +70,210 @@ void alcairo_write_pdf(cairo_surface_t *cs)
     cairo_surface_destroy(cs);
 }
 
-static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool north, bool east, bool south, bool west)
-{
-    if (north) {
-        draw_xticks(cs, fig, false);
-        draw_subxticks(cs, fig, false);
-    }
-    if (east) {
-        draw_yticks(cs, fig, false);
-        draw_subyticks(cs, fig, false);
-    }
-    if (south) {
-        draw_xticks(cs, fig, true);
-        draw_subxticks(cs, fig, true);
-    }
-    if (west) {
-        draw_yticks(cs, fig, true);
-        draw_subyticks(cs, fig, true);
-    }
-}
 
-
-/*
- * Draw the xticks.
- * loc:     false: north
- *          true:  south
- */
-static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+static void draw_ticks_(cairo_surface_t *cs, alfigure *fig, char pos, bool subticks)
 {
-    cairo_t *c;
+    cairo_t *cr;
+    alline *ticks;
     unsigned int i;
-    alpoint2d p_begin;
-    alpoint2d p_end;
-    alpoint2d p_fig;
-
-    c = cairo_create(cs);
-    for (i = 0; i < fig->nxticks; i++) {
-        p_fig.x = fig->xticks[i];
-        if (loc)
-            p_fig.y = fig->ylim[0];
-        else
-            p_fig.y = fig->ylim[1];
-        p_begin = p_end = fig_to_world(p_fig, fig);
-        p_begin.y  += 5;
-        p_end.y -= 5;
-#ifdef CAIRO_DEBUG
-        printf("draw_xticks: xtick beginning point, xtick ending point:\n");
-        printf("(%.2f, %.2f), ", p_begin.x, p_begin.y);
-        printf("(%.2f, %.2f)\n", p_end.x, p_end.y);
-#endif
-        cairo_move_to(c, p_begin.x, p_begin.y);
-        cairo_line_to(c, p_end.x, p_end.y);
+    unsigned int n;
+    n = alfigure_get_nticks(fig, pos, subticks);
+    cr = cairo_create(cs);
+    ticks = aldraw_get_ticks(fig, pos, subticks);
+    for (i = 0; i < n; i++) {
+        cairo_move_to(cr, ticks[i].begin.x, ticks[i].begin.y);
+        cairo_line_to(cr, ticks[i].end.x, ticks[i].end.y);
     }
-    cairo_set_line_width(c, 1.5);
-    cairo_stroke(c);
-    cairo_destroy(c);
+    
+    if (subticks) {
+        cairo_set_line_width(cr, fig->subtickwidth);
+    }
+    else {
+        cairo_set_line_width(cr, fig->tickwidth);
+    }
+    cairo_stroke(cr);
+    cairo_destroy(cr);
+    free(ticks);
 }
 
-static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+static void draw_ticks(cairo_surface_t *cs, alfigure *fig)
 {
-    if (fig->nsubxticks == 0) {
-#ifdef CAIRO_DEBUG
-        printf("draw_subxticks: No subxticks specified.\n");
-#endif
-        return;
+    if (fig->show_ticks[0]) {
+        draw_ticks_(cs, fig, 'n', 0);
+        draw_ticks_(cs, fig, 'n', 1);
     }
-    cairo_t *c;
-    unsigned int i;
-    alpoint2d p_begin;
-    alpoint2d p_end;
-    alpoint2d p_fig;
-
-    c = cairo_create(cs);
-    for (i = 0; i < fig->nsubxticks; i++) {
-        p_fig.x = fig->subxticks[i];
-        if (loc)
-            p_fig.y = fig->ylim[0];
-        else
-            p_fig.y = fig->ylim[1];
-        p_begin = p_end = fig_to_world(p_fig, fig);
-        p_begin.y += 3;
-        p_end.y -= 3;
-        cairo_move_to(c, p_begin.x, p_begin.y);
-        cairo_line_to(c, p_end.x, p_end.y);
+    if (fig->show_ticks[1]) {
+        draw_ticks_(cs, fig, 'e', 0);
+        draw_ticks_(cs, fig, 'e', 1);
     }
-    cairo_set_line_width(c, 0.5);
-    cairo_stroke(c);
-    cairo_destroy(c);
+    if (fig->show_ticks[2]) {
+        draw_ticks_(cs, fig, 's', 0);
+        draw_ticks_(cs, fig, 's', 1);
+    }
+    if (fig->show_ticks[3]) {
+        draw_ticks_(cs, fig, 'w', 0);
+        draw_ticks_(cs, fig, 'w', 1);
+    }
 }
 
 
-/*
- * Draw the xticks.
- * loc:     false: east
- *          true:  west
- */
-static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc)
-{
-    cairo_t *c;
-    unsigned int i;
-    alpoint2d p_begin;
-    alpoint2d p_end;
-    alpoint2d p_fig;
-
-    c = cairo_create(cs);
-    for (i = 0; i < fig->nyticks; i++) {
-        if (loc)
-            p_fig.x = fig->xlim[0];
-        else
-            p_fig.x = fig->xlim[1];
-        p_fig.y = fig->yticks[i];
-        p_begin = p_end = fig_to_world(p_fig, fig);
-        p_begin.x += 5;
-        p_end.x -= 5;
-#ifdef CAIRO_DEBUG
-        printf("draw_yticks: ytick beginning point, ytick ending point:\n");
-        printf("(%.2f, %.2f), ", p_begin.x, p_begin.y);
-        printf("(%.2f, %.2f)\n", p_end.x, p_end.y);
-#endif
-        cairo_move_to(c, p_begin.x, p_begin.y);
-        cairo_line_to(c, p_end.x, p_end.y);
-    }
-    cairo_set_line_width(c, 1.5);
-    cairo_stroke(c);
-    cairo_destroy(c);
-}
-
-static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc)
-{
-    if (fig->nsubyticks == 0) {
-#ifdef CAIRO_DEBUG
-        printf("draw_subyticks: No subyticks specified.\n");
-#endif
-        return;
-    }
-    cairo_t *c;
-    unsigned int i;
-    alpoint2d p_begin; 
-    alpoint2d p_end;
-    alpoint2d p_fig;
-
-    c = cairo_create(cs);
-    for (i = 0; i < fig->nsubyticks; i++) {
-        if (loc)
-            p_fig.x = fig->xlim[0];
-        else
-            p_fig.x = fig->xlim[1];
-        p_fig.y = fig->subyticks[i];
-        p_begin = p_end = fig_to_world(p_fig, fig);
-        p_begin.x += 3;
-        p_end.x -= 3;
-        cairo_move_to(c, p_begin.x, p_begin.y);
-        cairo_line_to(c, p_end.x, p_end.y);
-    }
-    cairo_set_line_width(c, 0.5);
-    cairo_stroke(c);
-    cairo_destroy(c);
-}
+//static void draw_ticks(cairo_surface_t *cs, alfigure *fig, bool north, bool east, bool south, bool west)
+//{
+//    if (north) {
+//        draw_xticks(cs, fig, false);
+//        draw_subxticks(cs, fig, false);
+//    }
+//    if (east) {
+//        draw_yticks(cs, fig, false);
+//        draw_subyticks(cs, fig, false);
+//    }
+//    if (south) {
+//        draw_xticks(cs, fig, true);
+//        draw_subxticks(cs, fig, true);
+//    }
+//    if (west) {
+//        draw_yticks(cs, fig, true);
+//        draw_subyticks(cs, fig, true);
+//    }
+//}
+//
+//
+///*
+// * Draw the xticks.
+// * loc:     false: north
+// *          true:  south
+// */
+//static void draw_xticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+//{
+//    cairo_t *c;
+//    unsigned int i;
+//    alpoint2d p_begin;
+//    alpoint2d p_end;
+//    alpoint2d p_fig;
+//
+//    c = cairo_create(cs);
+//    for (i = 0; i < fig->nxticks; i++) {
+//        p_fig.x = fig->xticks[i];
+//        if (loc)
+//            p_fig.y = fig->ylim[0];
+//        else
+//            p_fig.y = fig->ylim[1];
+//        p_begin = p_end = fig_to_world(p_fig, fig);
+//        p_begin.y  += 5;
+//        p_end.y -= 5;
+//#ifdef CAIRO_DEBUG
+//        printf("draw_xticks: xtick beginning point, xtick ending point:\n");
+//        printf("(%.2f, %.2f), ", p_begin.x, p_begin.y);
+//        printf("(%.2f, %.2f)\n", p_end.x, p_end.y);
+//#endif
+//        cairo_move_to(c, p_begin.x, p_begin.y);
+//        cairo_line_to(c, p_end.x, p_end.y);
+//    }
+//    cairo_set_line_width(c, 1.5);
+//    cairo_stroke(c);
+//    cairo_destroy(c);
+//}
+//
+//static void draw_subxticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+//{
+//    if (fig->nsubxticks == 0) {
+//#ifdef CAIRO_DEBUG
+//        printf("draw_subxticks: No subxticks specified.\n");
+//#endif
+//        return;
+//    }
+//    cairo_t *c;
+//    unsigned int i;
+//    alpoint2d p_begin;
+//    alpoint2d p_end;
+//    alpoint2d p_fig;
+//
+//    c = cairo_create(cs);
+//    for (i = 0; i < fig->nsubxticks; i++) {
+//        p_fig.x = fig->subxticks[i];
+//        if (loc)
+//            p_fig.y = fig->ylim[0];
+//        else
+//            p_fig.y = fig->ylim[1];
+//        p_begin = p_end = fig_to_world(p_fig, fig);
+//        p_begin.y += 3;
+//        p_end.y -= 3;
+//        cairo_move_to(c, p_begin.x, p_begin.y);
+//        cairo_line_to(c, p_end.x, p_end.y);
+//    }
+//    cairo_set_line_width(c, 0.5);
+//    cairo_stroke(c);
+//    cairo_destroy(c);
+//}
+//
+//
+///*
+// * Draw the xticks.
+// * loc:     false: east
+// *          true:  west
+// */
+//static void draw_yticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+//{
+//    cairo_t *c;
+//    unsigned int i;
+//    alpoint2d p_begin;
+//    alpoint2d p_end;
+//    alpoint2d p_fig;
+//
+//    c = cairo_create(cs);
+//    for (i = 0; i < fig->nyticks; i++) {
+//        if (loc)
+//            p_fig.x = fig->xlim[0];
+//        else
+//            p_fig.x = fig->xlim[1];
+//        p_fig.y = fig->yticks[i];
+//        p_begin = p_end = fig_to_world(p_fig, fig);
+//        p_begin.x += 5;
+//        p_end.x -= 5;
+//#ifdef CAIRO_DEBUG
+//        printf("draw_yticks: ytick beginning point, ytick ending point:\n");
+//        printf("(%.2f, %.2f), ", p_begin.x, p_begin.y);
+//        printf("(%.2f, %.2f)\n", p_end.x, p_end.y);
+//#endif
+//        cairo_move_to(c, p_begin.x, p_begin.y);
+//        cairo_line_to(c, p_end.x, p_end.y);
+//    }
+//    cairo_set_line_width(c, 1.5);
+//    cairo_stroke(c);
+//    cairo_destroy(c);
+//}
+//
+//static void draw_subyticks(cairo_surface_t *cs, alfigure *fig, bool loc)
+//{
+//    if (fig->nsubyticks == 0) {
+//#ifdef CAIRO_DEBUG
+//        printf("draw_subyticks: No subyticks specified.\n");
+//#endif
+//        return;
+//    }
+//    cairo_t *c;
+//    unsigned int i;
+//    alpoint2d p_begin; 
+//    alpoint2d p_end;
+//    alpoint2d p_fig;
+//
+//    c = cairo_create(cs);
+//    for (i = 0; i < fig->nsubyticks; i++) {
+//        if (loc)
+//            p_fig.x = fig->xlim[0];
+//        else
+//            p_fig.x = fig->xlim[1];
+//        p_fig.y = fig->subyticks[i];
+//        p_begin = p_end = fig_to_world(p_fig, fig);
+//        p_begin.x += 3;
+//        p_end.x -= 3;
+//        cairo_move_to(c, p_begin.x, p_begin.y);
+//        cairo_line_to(c, p_end.x, p_end.y);
+//    }
+//    cairo_set_line_width(c, 0.5);
+//    cairo_stroke(c);
+//    cairo_destroy(c);
+//}
 
 
 static void draw_points(cairo_surface_t *cs, alfigure *fig)
